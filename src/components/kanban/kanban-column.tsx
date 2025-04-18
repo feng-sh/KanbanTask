@@ -3,6 +3,9 @@
 import React from "react"
 import { cn } from "@/lib/utils"
 
+// KanbanColumnPropsの型定義はこのファイル内でのみ使用されるため、
+// types.tsには移動せず、ここで定義しています
+
 /**
  * カンバンカラムのプロパティ定義
  */

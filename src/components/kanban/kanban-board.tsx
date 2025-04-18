@@ -3,30 +3,14 @@
 import React from "react"
 import { KanbanColumn } from "./kanban-column"
 import { TaskCard } from "./task-card"
-
-/**
- * タスクのデータ構造を定義
- * タスクの基本情報と担当者情報を含む
- */
-export type Task = {
-  id: string
-  title: string
-  description: string
-  status: "todo" | "in-progress" | "done"
-  priority?: "low" | "medium" | "high"
-  assignee?: {
-    id: string
-    name: string
-    avatar?: string
-  }
-}
+import { Task, TeamMember, KanbanColumn as KanbanColumnType } from "./types"
 
 /**
  * サンプルチームメンバーデータ
  * タスクに割り当て可能なメンバーのリスト
  * 各メンバーはID、名前、アバター画像のURLを持つ
  */
-const teamMembers = [
+const teamMembers: TeamMember[] = [
   {
     id: "user-1",
     name: "Alex Johnson",
@@ -54,6 +38,10 @@ const teamMembers = [
   },
 ]
 
+/**
+ * サンプルタスクデータ
+ * カンバンボードに表示する初期タスク
+ */
 const sampleTasks: Task[] = [
   {
     id: "task-1",
@@ -106,6 +94,16 @@ const sampleTasks: Task[] = [
 ]
 
 /**
+ * カンバン列の定義
+ * 各列のID、タイトル、対応するタスクのステータスを定義
+ */
+const columns: KanbanColumnType[] = [
+  { id: "todo", title: "Todo", status: "todo" },
+  { id: "in-progress", title: "In Progress", status: "in-progress" },
+  { id: "done", title: "Done", status: "done" },
+];
+
+/**
  * カンバンボードコンポーネント
  *
  * タスクをステータス（Todo、In Progress、Done）ごとに分類して表示し、
@@ -135,6 +133,11 @@ export function KanbanBoard() {
           } else {
             // 新しい担当者を設定
             const newAssignee = teamMembers.find((member) => member.id === assigneeId)
+            // エラーハンドリング: 担当者が見つからない場合
+            if (!newAssignee) {
+              console.warn(`Team member with ID ${assigneeId} not found`)
+              return task // 変更せずに元のタスクを返す
+            }
             return { ...task, assignee: newAssignee }
           }
         }
@@ -144,48 +147,38 @@ export function KanbanBoard() {
   }
 
   /**
-   * タスクをステータスでフィルタリング
+   * タスクをステータスでフィルタリング（メモ化）
    * 各カラム（Todo、In Progress、Done）に表示するタスクを取得
+   * useMemoを使用して再レンダリング時のパフォーマンスを最適化
    */
-  const todoTasks = tasks.filter((task) => task.status === "todo")
-  const inProgressTasks = tasks.filter((task) => task.status === "in-progress")
-  const doneTasks = tasks.filter((task) => task.status === "done")
+  const filteredTasks = React.useMemo(() => {
+    return columns.reduce<Record<string, Task[]>>((acc, column) => {
+      acc[column.id] = tasks.filter(task => task.status === column.status);
+      return acc;
+    }, {});
+  }, [tasks])
 
   return (
     <div className="w-full overflow-x-auto">
       <div className="flex min-w-[768px] gap-4 p-4">
-        <KanbanColumn title="Todo" count={todoTasks.length}>
-          {todoTasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              teamMembers={teamMembers}
-              onAssigneeChange={(assigneeId: string | null) => updateTaskAssignee(task.id, assigneeId)}
-            />
-          ))}
-        </KanbanColumn>
-
-        <KanbanColumn title="In Progress" count={inProgressTasks.length}>
-          {inProgressTasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              teamMembers={teamMembers}
-              onAssigneeChange={(assigneeId: string | null) => updateTaskAssignee(task.id, assigneeId)}
-            />
-          ))}
-        </KanbanColumn>
-
-        <KanbanColumn title="Done" count={doneTasks.length}>
-          {doneTasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              teamMembers={teamMembers}
-              onAssigneeChange={(assigneeId: string | null) => updateTaskAssignee(task.id, assigneeId)}
-            />
-          ))}
-        </KanbanColumn>
+        {columns.map((column) => (
+          <KanbanColumn
+            key={column.id}
+            title={column.title}
+            count={filteredTasks[column.id]?.length || 0}
+          >
+            {filteredTasks[column.id]?.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                teamMembers={teamMembers}
+                onAssigneeChange={(assigneeId: string | null) =>
+                  updateTaskAssignee(task.id, assigneeId)
+                }
+              />
+            ))}
+          </KanbanColumn>
+        ))}
       </div>
     </div>
   )

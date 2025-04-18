@@ -2,21 +2,24 @@
 
 import React from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Task } from "./kanban-board"
+import { Task, TeamMember } from "./types"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Check, ChevronsUpDown, UserCircle2 } from "lucide-react"
 
+/**
+ * タスクカードのプロパティ定義
+ */
 interface TaskCardProps {
+  /** 表示するタスク情報 */
   task: Task
+  /** 追加のCSSクラス */
   className?: string
-  teamMembers: Array<{
-    id: string
-    name: string
-    avatar?: string
-  }>
+  /** 割り当て可能なチームメンバーのリスト */
+  teamMembers: TeamMember[]
+  /** 担当者変更時のコールバック関数 */
   onAssigneeChange: (assigneeId: string | null) => void
 }
 
@@ -126,6 +129,8 @@ export function TaskCard({ task, className, teamMembers, onAssigneeChange }: Tas
                 {/* チームメンバーのリストをマップして表示 */}
                 {teamMembers.map((member) => (
                   <div
+                    role="menuitem"
+                    tabIndex={0}
                     key={member.id}
                     className={cn(
                       "flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer hover:bg-secondary",
@@ -136,6 +141,14 @@ export function TaskCard({ task, className, teamMembers, onAssigneeChange }: Tas
                       // クリックされたメンバーを担当者に設定
                       onAssigneeChange(member.id)
                       setOpen(false) // ポップオーバーを閉じる
+                    }}
+                    onKeyDown={(e) => {
+                      // キーボードアクセシビリティのサポート
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault()
+                        onAssigneeChange(member.id)
+                        setOpen(false)
+                      }
                     }}
                   >
                     <Avatar className="h-6 w-6">
@@ -153,11 +166,21 @@ export function TaskCard({ task, className, teamMembers, onAssigneeChange }: Tas
                 {/* 担当者が設定されている場合のみ「Unassign」オプションを表示 */}
                 {task.assignee && (
                   <div
+                    role="menuitem"
+                    tabIndex={0}
                     className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer hover:bg-secondary border-t"
                     onClick={() => {
                       // 担当者の割り当てを解除
                       onAssigneeChange(null)
                       setOpen(false) // ポップオーバーを閉じる
+                    }}
+                    onKeyDown={(e) => {
+                      // キーボードアクセシビリティのサポート
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault()
+                        onAssigneeChange(null)
+                        setOpen(false)
+                      }
                     }}
                   >
                     <UserCircle2 className="h-4 w-4" />
