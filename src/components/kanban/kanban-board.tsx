@@ -4,7 +4,10 @@ import React from "react"
 import { KanbanColumn } from "./kanban-column"
 import { TaskCard } from "./task-card"
 
-// Sample task data
+/**
+ * タスクのデータ構造を定義
+ * タスクの基本情報と担当者情報を含む
+ */
 export type Task = {
   id: string
   title: string
@@ -18,7 +21,11 @@ export type Task = {
   }
 }
 
-// Sample team members
+/**
+ * サンプルチームメンバーデータ
+ * タスクに割り当て可能なメンバーのリスト
+ * 各メンバーはID、名前、アバター画像のURLを持つ
+ */
 const teamMembers = [
   {
     id: "user-1",
@@ -98,21 +105,35 @@ const sampleTasks: Task[] = [
   },
 ]
 
+/**
+ * カンバンボードコンポーネント
+ *
+ * タスクをステータス（Todo、In Progress、Done）ごとに分類して表示し、
+ * 担当者の割り当て機能を提供します。
+ */
 export function KanbanBoard() {
-  // State for tasks
+  /**
+   * タスクの状態管理
+   * 初期値としてサンプルタスクを設定
+   */
   const [tasks, setTasks] = React.useState<Task[]>(sampleTasks)
 
-  // Function to update task assignee
+  /**
+   * タスクの担当者を更新する関数
+   *
+   * @param taskId - 更新対象のタスクID
+   * @param assigneeId - 新しい担当者のID（nullの場合は担当者を削除）
+   */
   const updateTaskAssignee = (taskId: string, assigneeId: string | null) => {
     setTasks((prevTasks) =>
       prevTasks.map((task) => {
         if (task.id === taskId) {
           if (assigneeId === null) {
-            // Remove assignee
+            // 担当者を削除（割り当て解除）
             const { assignee, ...rest } = task
             return rest
           } else {
-            // Update assignee
+            // 新しい担当者を設定
             const newAssignee = teamMembers.find((member) => member.id === assigneeId)
             return { ...task, assignee: newAssignee }
           }
@@ -122,7 +143,10 @@ export function KanbanBoard() {
     )
   }
 
-  // Filter tasks by status
+  /**
+   * タスクをステータスでフィルタリング
+   * 各カラム（Todo、In Progress、Done）に表示するタスクを取得
+   */
   const todoTasks = tasks.filter((task) => task.status === "todo")
   const inProgressTasks = tasks.filter((task) => task.status === "in-progress")
   const doneTasks = tasks.filter((task) => task.status === "done")
@@ -136,7 +160,7 @@ export function KanbanBoard() {
               key={task.id}
               task={task}
               teamMembers={teamMembers}
-              onAssigneeChange={(assigneeId) => updateTaskAssignee(task.id, assigneeId)}
+              onAssigneeChange={(assigneeId: string | null) => updateTaskAssignee(task.id, assigneeId)}
             />
           ))}
         </KanbanColumn>
@@ -147,7 +171,7 @@ export function KanbanBoard() {
               key={task.id}
               task={task}
               teamMembers={teamMembers}
-              onAssigneeChange={(assigneeId) => updateTaskAssignee(task.id, assigneeId)}
+              onAssigneeChange={(assigneeId: string | null) => updateTaskAssignee(task.id, assigneeId)}
             />
           ))}
         </KanbanColumn>
@@ -158,7 +182,7 @@ export function KanbanBoard() {
               key={task.id}
               task={task}
               teamMembers={teamMembers}
-              onAssigneeChange={(assigneeId) => updateTaskAssignee(task.id, assigneeId)}
+              onAssigneeChange={(assigneeId: string | null) => updateTaskAssignee(task.id, assigneeId)}
             />
           ))}
         </KanbanColumn>
