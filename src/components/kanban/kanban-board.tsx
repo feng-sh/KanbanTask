@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { KanbanColumn } from "./kanban-column";
 import { TaskCard } from "./task-card";
 import { TaskDialog } from "./task-dialog";
@@ -8,104 +8,7 @@ import { Task, TeamMember, KanbanColumn as KanbanColumnType } from "./types";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
-
-/**
- * サンプルチームメンバーデータ
- * タスクに割り当て可能なメンバーのリスト
- * 各メンバーはID、名前、アバター画像のURLを持つ
- */
-const teamMembers: TeamMember[] = [
-  {
-    id: "user-1",
-    name: "Alex Johnson",
-    avatar: "https://ui.shadcn.com/avatars/01.png",
-  },
-  {
-    id: "user-2",
-    name: "Sam Wilson",
-    avatar: "https://ui.shadcn.com/avatars/02.png",
-  },
-  {
-    id: "user-3",
-    name: "Taylor Kim",
-    avatar: "https://ui.shadcn.com/avatars/03.png",
-  },
-  {
-    id: "user-4",
-    name: "Jordan Lee",
-    avatar: "https://ui.shadcn.com/avatars/04.png",
-  },
-  {
-    id: "user-5",
-    name: "Casey Morgan",
-    avatar: "https://ui.shadcn.com/avatars/05.png",
-  },
-];
-
-/**
- * サンプルタスクデータ
- * カンバンボードに表示する初期タスク
- */
-const sampleTasks: Task[] = [
-  {
-    id: "task-1",
-    title: "Research competitors",
-    description: "Analyze top 5 competitors in the market",
-    status: "todo",
-    priority: "high",
-    assignee: teamMembers[0],
-  },
-  {
-    id: "task-2",
-    title: "Design homepage",
-    description: "Create wireframes for the new homepage",
-    status: "todo",
-    priority: "medium",
-    assignee: teamMembers[1],
-  },
-  {
-    id: "task-3",
-    title: "Setup CI/CD pipeline",
-    description: "Configure GitHub Actions for automated testing",
-    status: "in-progress",
-    priority: "high",
-    assignee: teamMembers[2],
-  },
-  {
-    id: "task-4",
-    title: "Implement authentication",
-    description: "Add user login and registration functionality",
-    status: "in-progress",
-    priority: "medium",
-    assignee: teamMembers[3],
-  },
-  {
-    id: "task-5",
-    title: "Write documentation",
-    description: "Create user guide for the admin panel",
-    status: "done",
-    priority: "low",
-    assignee: teamMembers[4],
-  },
-  {
-    id: "task-6",
-    title: "Fix navigation bug",
-    description: "Resolve issue with dropdown menu on mobile",
-    status: "done",
-    priority: "high",
-    assignee: teamMembers[0],
-  },
-];
-
-/**
- * カンバン列の定義
- * 各列のID、タイトル、対応するタスクのステータスを定義
- */
-const columns: KanbanColumnType[] = [
-  { id: "todo", title: "Todo", status: "todo" },
-  { id: "in-progress", title: "進行中", status: "in-progress" },
-  { id: "done", title: "完了", status: "done" },
-];
+import { getTeamMembers, getColumns, getTasks } from "@/lib/actions/kanban";
 
 /**
  * カンバンボードコンポーネント
@@ -114,11 +17,52 @@ const columns: KanbanColumnType[] = [
  * 担当者の割り当て機能を提供します。
  */
 export const KanbanBoard = () => {
-  /**
-   * タスクの状態管理
-   * 初期値としてサンプルタスクを設定
-   */
-  const [tasks, setTasks] = useState<Task[]>(sampleTasks);
+  // データの状態管理
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [columns, setColumns] = useState<KanbanColumnType[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // データの取得
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+
+        // 并行でデータを取得
+        const [membersResult, columnsResult, tasksResult] = await Promise.all([
+          getTeamMembers(),
+          getColumns(),
+          getTasks()
+        ]);
+
+        // エラーハンドリング
+        if (!membersResult.success) {
+          throw new Error(membersResult.error || 'チームメンバーの取得に失敗しました');
+        }
+        if (!columnsResult.success) {
+          throw new Error(columnsResult.error || 'カラムの取得に失敗しました');
+        }
+        if (!tasksResult.success) {
+          throw new Error(tasksResult.error || 'タスクの取得に失敗しました');
+        }
+
+        // データを設定
+        if (membersResult.data) setTeamMembers(membersResult.data);
+        if (columnsResult.data) setColumns(columnsResult.data);
+        if (tasksResult.data) setTasks(tasksResult.data);
+        setErrorMessage(null);
+      } catch (err) {
+        console.error('Failed to fetch data:', err);
+        setErrorMessage('データの取得に失敗しました。ページを再読み込みしてください。');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   /**
    * ダイアログの状態管理
@@ -142,6 +86,7 @@ export const KanbanBoard = () => {
         if (task.id === taskId) {
           if (assigneeId === null) {
             // 担当者を削除（割り当て解除）
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { assignee, ...rest } = task;
             return rest;
           } else {
@@ -170,7 +115,7 @@ export const KanbanBoard = () => {
       acc[column.id] = tasks.filter(task => task.status === column.status);
       return acc;
     }, {});
-  }, [tasks]);
+  }, [tasks, columns]);
 
   /**
    * タスクの編集を開始する関数
@@ -193,7 +138,14 @@ export const KanbanBoard = () => {
    * タスクの保存処理を行う関数
    * @param values - フォームの値
    */
-  const handleSaveTask = (values: any) => {
+  const handleSaveTask = (values: {
+    id?: string;
+    title: string;
+    description: string;
+    status: "todo" | "in-progress" | "done";
+    priority: "low" | "medium" | "high";
+    assigneeId?: string;
+  }) => {
     if (values.id) {
       // 既存タスクの更新
       setTasks((prevTasks) =>
@@ -238,6 +190,30 @@ export const KanbanBoard = () => {
       setTasks((prevTasks) => [...prevTasks, newTask]);
     }
   };
+
+  // ローディング中の表示
+  if (isLoading) {
+    return (
+      <div className="w-full flex justify-center items-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>データを読み込み中です...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // エラーの表示
+  if (errorMessage) {
+    return (
+      <div className="w-full flex justify-center items-center py-12">
+        <div className="text-center text-destructive">
+          <p className="mb-4">{errorMessage}</p>
+          <Button onClick={() => window.location.reload()}>再読み込み</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
