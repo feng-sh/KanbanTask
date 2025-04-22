@@ -97,7 +97,11 @@ export const TaskCard = ({ task, className, teamMembers, onAssigneeChange }: Tas
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 border-dashed justify-start"
+                className="h-8 border-dashed justify-start hover:bg-secondary/50 transition-colors"
+                onClick={(e) => {
+                  // クリックイベントの伝播を停止して、親要素のクリックイベントが発火しないようにする
+                  e.stopPropagation();
+                }}
               >
                 {/* 担当者が割り当てられている場合はアバターと名前を表示 */}
                 {task.assignee ? (
@@ -120,7 +124,14 @@ export const TaskCard = ({ task, className, teamMembers, onAssigneeChange }: Tas
             </PopoverTrigger>
 
             {/* チームメンバー選択のポップオーバーコンテンツ */}
-            <PopoverContent className="w-[200px] p-0" align="end">
+            <PopoverContent
+              className="w-[200px] p-0"
+              align="end"
+              onClick={(e) => {
+                // クリックイベントの伝播を停止
+                e.stopPropagation();
+              }}
+            >
               <div className="max-h-[300px] overflow-auto">
                 {/* チームメンバーのリストをマップして表示 */}
                 {teamMembers.map((member) => (
