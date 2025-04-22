@@ -103,8 +103,8 @@ const sampleTasks: Task[] = [
  */
 const columns: KanbanColumnType[] = [
   { id: "todo", title: "Todo", status: "todo" },
-  { id: "in-progress", title: "In Progress", status: "in-progress" },
-  { id: "done", title: "Done", status: "done" },
+  { id: "in-progress", title: "進行中", status: "in-progress" },
+  { id: "done", title: "完了", status: "done" },
 ];
 
 /**
