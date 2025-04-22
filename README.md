@@ -2,7 +2,37 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+### Database Setup
+
+This project uses PostgreSQL with Drizzle ORM. Follow these steps to set up the database:
+
+1. Start the PostgreSQL database using Docker:
+
+```bash
+docker-compose up -d
+```
+
+2. Generate the database migrations:
+
+```bash
+npm run db:generate
+```
+
+3. Apply the migrations to the database:
+
+```bash
+npm run db:migrate:run
+```
+
+4. Seed the database with initial data:
+
+```bash
+npm run db:seed
+```
+
+### Running the Application
+
+After setting up the database, run the development server:
 
 ```bash
 npm run dev
