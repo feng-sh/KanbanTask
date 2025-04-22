@@ -28,12 +28,12 @@ interface KanbanColumnProps {
  *
  * @param props - カンバンカラムのプロパティ
  */
-export function KanbanColumn({
+export const KanbanColumn = ({
   title,
   count,
   children,
   className,
-}: KanbanColumnProps) {
+}: KanbanColumnProps) => {
   return (
     // カラムのコンテナ
     <div

@@ -12,7 +12,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-export function ThemeToggle() {
+/**
+ * テーマ切り替えコンポーネント
+ * ライトモード、ダークモード、システム設定の切り替えを提供します
+ */
+export const ThemeToggle = () => {
   const { setTheme } = useTheme()
 
   return (

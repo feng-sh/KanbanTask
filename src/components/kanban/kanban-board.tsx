@@ -109,7 +109,7 @@ const columns: KanbanColumnType[] = [
  * タスクをステータス（Todo、In Progress、Done）ごとに分類して表示し、
  * 担当者の割り当て機能を提供します。
  */
-export function KanbanBoard() {
+export const KanbanBoard = () => {
   /**
    * タスクの状態管理
    * 初期値としてサンプルタスクを設定

@@ -5,14 +5,19 @@ export const metadata: Metadata = {
   description: "A Kanban board built with shadcn/ui and Tailwind CSS",
 }
 
-export default function KanbanLayout({
+/**
+ * カンバンレイアウトコンポーネント
+ */
+const KanbanLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode
-}>) {
+}>) => {
   return (
     <div className="container mx-auto max-w-7xl">
       {children}
     </div>
   )
-}
+};
+
+export default KanbanLayout;

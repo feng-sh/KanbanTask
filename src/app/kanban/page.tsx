@@ -2,11 +2,14 @@
 
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { ThemeToggle } from "@/components/theme-toggle";
-export default function KanbanPage() {
+/**
+ * カンバンページコンポーネント
+ */
+const KanbanPage = () => {
   return (
     <div className="min-h-screen p-8">
-      <header className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Kanban Board</h1>
+      <header className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-4 mb-8">
+        <h1 className="text-2xl font-bold">Kanban Board</h1>
         <ThemeToggle />
       </header>
       <main className="container mx-auto max-w-6xl">
@@ -17,4 +20,6 @@ export default function KanbanPage() {
       </div>
     </div>
   );
-}
+};
+
+export default KanbanPage;

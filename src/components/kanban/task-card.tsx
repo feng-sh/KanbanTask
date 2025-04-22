@@ -33,7 +33,7 @@ interface TaskCardProps {
  * @param teamMembers - 割り当て可能なチームメンバーのリスト
  * @param onAssigneeChange - 担当者変更時のコールバック関数
  */
-export function TaskCard({ task, className, teamMembers, onAssigneeChange }: TaskCardProps) {
+export const TaskCard = ({ task, className, teamMembers, onAssigneeChange }: TaskCardProps) => {
   // ポップオーバーの開閉状態を管理
   const [open, setOpen] = React.useState(false)
 
@@ -61,7 +61,7 @@ export function TaskCard({ task, className, teamMembers, onAssigneeChange }: Tas
    * @param name - イニシャルを生成する対象の名前
    * @returns 生成されたイニシャル（大文字）
    */
-  const getInitials = (name: string) => {
+  const getInitials = (name: string): string => {
     return name
       .split(" ")      // 名前を空白で分割
       .map((n) => n[0]) // 各単語の最初の文字を取得
