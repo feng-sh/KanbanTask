@@ -159,8 +159,10 @@ export function KanbanBoard() {
   }, [tasks])
 
   return (
-    <div className="w-full overflow-x-auto">
-      <div className="flex min-w-[768px] gap-4 p-4">
+    <div className="w-full">
+      <h2 className="text-2xl font-bold mb-6">Kanban Board</h2>
+      <div className="w-full overflow-x-auto">
+        <div className="flex min-w-[768px] gap-6">
         {columns.map((column) => (
           <KanbanColumn
             key={column.id}
@@ -179,6 +181,7 @@ export function KanbanBoard() {
             ))}
           </KanbanColumn>
         ))}
+        </div>
       </div>
     </div>
   )

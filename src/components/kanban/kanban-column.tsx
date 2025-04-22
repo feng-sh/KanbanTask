@@ -38,7 +38,7 @@ export function KanbanColumn({
     // カラムのコンテナ
     <div
       className={cn(
-        "flex flex-1 flex-col rounded-lg bg-secondary/30 shadow-sm",
+        "flex flex-1 flex-col rounded-lg bg-secondary/30 shadow-sm w-full",
         className
       )}
     >
@@ -49,7 +49,7 @@ export function KanbanColumn({
         </h3>
       </div>
       {/* タスクカードを表示するスクロール可能なエリア */}
-      <div className="flex flex-col gap-2 p-2 overflow-y-auto max-h-[calc(100vh-200px)]">
+      <div className="flex flex-col gap-3 p-3 overflow-y-auto max-h-[calc(100vh-220px)]">
         {children}
       </div>
     </div>
