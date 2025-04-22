@@ -3,7 +3,11 @@
 import React from "react"
 import { KanbanColumn } from "./kanban-column"
 import { TaskCard } from "./task-card"
+import { TaskDialog } from "./task-dialog"
 import { Task, TeamMember, KanbanColumn as KanbanColumnType } from "./types"
+import { Button } from "@/components/ui/button"
+import { PlusCircle } from "lucide-react"
+import { v4 as uuidv4 } from "uuid"
 
 /**
  * サンプルチームメンバーデータ
@@ -117,6 +121,16 @@ export const KanbanBoard = () => {
   const [tasks, setTasks] = React.useState<Task[]>(sampleTasks)
 
   /**
+   * ダイアログの状態管理
+   */
+  const [dialogOpen, setDialogOpen] = React.useState(false)
+
+  /**
+   * 編集中のタスクの状態管理
+   */
+  const [editingTask, setEditingTask] = React.useState<Task | undefined>(undefined)
+
+  /**
    * タスクの担当者を更新する関数
    *
    * @param taskId - 更新対象のタスクID
@@ -158,8 +172,82 @@ export const KanbanBoard = () => {
     }, {});
   }, [tasks])
 
+  /**
+   * タスクの編集を開始する関数
+   * @param task - 編集対象のタスク
+   */
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task)
+    setDialogOpen(true)
+  }
+
+  /**
+   * 新規タスクの作成を開始する関数
+   */
+  const handleCreateTask = () => {
+    setEditingTask(undefined)
+    setDialogOpen(true)
+  }
+
+  /**
+   * タスクの保存処理を行う関数
+   * @param values - フォームの値
+   */
+  const handleSaveTask = (values: any) => {
+    if (values.id) {
+      // 既存タスクの更新
+      setTasks((prevTasks) =>
+        prevTasks.map((task) => {
+          if (task.id === values.id) {
+            // 担当者の処理
+            let assignee
+            if (values.assigneeId && values.assigneeId !== "unassigned") {
+              assignee = teamMembers.find((member) => member.id === values.assigneeId)
+            }
+
+            return {
+              ...task,
+              title: values.title,
+              description: values.description,
+              status: values.status,
+              priority: values.priority,
+              assignee,
+            }
+          }
+          return task
+        })
+      )
+    } else {
+      // 新規タスクの作成
+      const newTask: Task = {
+        id: uuidv4(),
+        title: values.title,
+        description: values.description,
+        status: values.status,
+        priority: values.priority,
+      }
+
+      // 担当者が選択されていれば追加
+      if (values.assigneeId && values.assigneeId !== "unassigned") {
+        const assignee = teamMembers.find((member) => member.id === values.assigneeId)
+        if (assignee) {
+          newTask.assignee = assignee
+        }
+      }
+
+      setTasks((prevTasks) => [...prevTasks, newTask])
+    }
+  }
+
   return (
     <div className="w-full">
+      <div className="flex justify-end mb-4">
+        <Button onClick={handleCreateTask} className="flex items-center gap-1">
+          <PlusCircle className="h-4 w-4" />
+          新規タスク
+        </Button>
+      </div>
+
       <div className="w-full overflow-x-auto">
         <div className="flex min-w-[768px] gap-6">
         {columns.map((column) => (
@@ -169,19 +257,28 @@ export const KanbanBoard = () => {
             count={filteredTasks[column.id]?.length || 0}
           >
             {filteredTasks[column.id]?.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                teamMembers={teamMembers}
-                onAssigneeChange={(assigneeId: string | null) =>
-                  updateTaskAssignee(task.id, assigneeId)
-                }
-              />
+              <div key={task.id} onClick={() => handleEditTask(task)} className="cursor-pointer">
+                <TaskCard
+                  task={task}
+                  teamMembers={teamMembers}
+                  onAssigneeChange={(assigneeId: string | null) =>
+                    updateTaskAssignee(task.id, assigneeId)
+                  }
+                />
+              </div>
             ))}
           </KanbanColumn>
         ))}
         </div>
       </div>
+
+      <TaskDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        task={editingTask}
+        teamMembers={teamMembers}
+        onSave={handleSaveTask}
+      />
     </div>
   )
 }
