@@ -89,11 +89,7 @@ export const TaskCard = ({ task, className, teamMembers, onAssigneeChange }: Tas
       <CardContent className="p-3 pt-2">
         <p className="text-sm text-muted-foreground mb-3">{task.description}</p>
 
-        <div className="flex items-center justify-between">
-          <div className="text-xs text-muted-foreground">
-            ID: {task.id}
-          </div>
-
+        <div className="flex items-center justify-end">
           {/* 担当者割り当てのためのポップオーバーコンポーネント */}
           <Popover open={open} onOpenChange={setOpen}>
             {/* ポップオーバーを開くためのトリガーボタン */}
