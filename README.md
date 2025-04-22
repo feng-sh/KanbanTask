@@ -18,6 +18,12 @@ docker-compose up -d
 npm run db:generate
 ```
 
+   または、スキーマを直接データベースに適用する場合:
+
+```bash
+npm run db:push
+```
+
 3. Apply the migrations to the database:
 
 ```bash
