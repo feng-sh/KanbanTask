@@ -31,7 +31,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Task, TeamMember } from "./types";
+
+/**
+ * 名前からイニシャルを生成する関数
+ * 例: "John Doe" -> "JD"
+ *
+ * 処理内容:
+ * 1. 名前を空白で分割して配列にする
+ * 2. 各単語の最初の文字を取得
+ * 3. 取得した文字を結合
+ * 4. 大文字に変換
+ *
+ * @param name - イニシャルを生成する対象の名前
+ * @returns 生成されたイニシャル（大文字）
+ */
+const getInitials = (name: string): string => {
+  return name
+    .split(" ")      // 名前を空白で分割
+    .map((n) => n[0]) // 各単語の最初の文字を取得
+    .join("")        // 文字を結合
+    .toUpperCase();    // 大文字に変換
+};
 
 /**
  * タスクフォームのバリデーションスキーマ
@@ -250,10 +272,21 @@ export const TaskDialog = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="unassigned">未割り当て</SelectItem>
+                      <SelectItem value="unassigned">
+                        <div className="flex items-center gap-2">
+                          <span className="h-6 w-6 flex items-center justify-center">—</span>
+                          <span>未割り当て</span>
+                        </div>
+                      </SelectItem>
                       {teamMembers.map((member) => (
                         <SelectItem key={member.id} value={member.id}>
-                          {member.name}
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage src={member.avatar} alt={member.name} />
+                              <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
+                            </Avatar>
+                            <span>{member.name}</span>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
