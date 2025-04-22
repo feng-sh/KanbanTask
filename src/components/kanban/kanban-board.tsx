@@ -160,7 +160,6 @@ export function KanbanBoard() {
 
   return (
     <div className="w-full">
-      <h2 className="text-2xl font-bold mb-6">Kanban Board</h2>
       <div className="w-full overflow-x-auto">
         <div className="flex min-w-[768px] gap-6">
         {columns.map((column) => (
