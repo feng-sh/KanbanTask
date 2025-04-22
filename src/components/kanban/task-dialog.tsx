@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import { useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -110,7 +110,7 @@ export const TaskDialog = ({
   })
 
   // ダイアログが開かれたときにフォームをリセット
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
       if (task) {
         form.reset({

@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import { useState, useMemo } from "react"
 import { KanbanColumn } from "./kanban-column"
 import { TaskCard } from "./task-card"
 import { TaskDialog } from "./task-dialog"
@@ -118,17 +118,17 @@ export const KanbanBoard = () => {
    * タスクの状態管理
    * 初期値としてサンプルタスクを設定
    */
-  const [tasks, setTasks] = React.useState<Task[]>(sampleTasks)
+  const [tasks, setTasks] = useState<Task[]>(sampleTasks)
 
   /**
    * ダイアログの状態管理
    */
-  const [dialogOpen, setDialogOpen] = React.useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   /**
    * 編集中のタスクの状態管理
    */
-  const [editingTask, setEditingTask] = React.useState<Task | undefined>(undefined)
+  const [editingTask, setEditingTask] = useState<Task | undefined>(undefined)
 
   /**
    * タスクの担当者を更新する関数
@@ -165,7 +165,7 @@ export const KanbanBoard = () => {
    * 各カラム（Todo、In Progress、Done）に表示するタスクを取得
    * useMemoを使用して再レンダリング時のパフォーマンスを最適化
    */
-  const filteredTasks = React.useMemo(() => {
+  const filteredTasks = useMemo(() => {
     return columns.reduce<Record<string, Task[]>>((acc, column) => {
       acc[column.id] = tasks.filter(task => task.status === column.status);
       return acc;

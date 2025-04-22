@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import { useState } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Task, TeamMember } from "./types"
 import { cn } from "@/lib/utils"
@@ -35,7 +35,7 @@ interface TaskCardProps {
  */
 export const TaskCard = ({ task, className, teamMembers, onAssigneeChange }: TaskCardProps) => {
   // ポップオーバーの開閉状態を管理
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = useState(false)
 
   /**
    * 優先度に応じたバッジの色を定義

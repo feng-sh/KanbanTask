@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import { ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
 // KanbanColumnPropsの型定義はこのファイル内でのみ使用されるため、
@@ -15,7 +15,7 @@ interface KanbanColumnProps {
   /** カラム内のタスク数 */
   count: number
   /** カラム内に表示するタスクカードなどの子要素 */
-  children: React.ReactNode
+  children: ReactNode
   /** 追加のCSSクラス */
   className?: string
 }
