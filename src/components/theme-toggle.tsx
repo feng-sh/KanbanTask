@@ -1,23 +1,23 @@
 "use client"
 
-import * as React from "react"
-import { Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
+import {} from "react";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 /**
  * テーマ切り替えコンポーネント
  * ライトモード、ダークモード、システム設定の切り替えを提供します
  */
 export const ThemeToggle = () => {
-  const { setTheme } = useTheme()
+  const { setTheme } = useTheme();
 
   return (
     <DropdownMenu>
@@ -40,5 +40,5 @@ export const ThemeToggle = () => {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
-}
+  );
+};

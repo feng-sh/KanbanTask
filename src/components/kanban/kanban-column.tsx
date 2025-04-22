@@ -1,7 +1,7 @@
 "use client"
 
-import { ReactNode } from "react"
-import { cn } from "@/lib/utils"
+import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 // KanbanColumnPropsの型定義はこのファイル内でのみ使用されるため、
 // types.tsには移動せず、ここで定義しています
@@ -11,13 +11,13 @@ import { cn } from "@/lib/utils"
  */
 interface KanbanColumnProps {
   /** カラムのタイトル（Todo、In Progress、Doneなど） */
-  title: string
+  title: string;
   /** カラム内のタスク数 */
-  count: number
+  count: number;
   /** カラム内に表示するタスクカードなどの子要素 */
-  children: ReactNode
+  children: ReactNode;
   /** 追加のCSSクラス */
-  className?: string
+  className?: string;
 }
 
 /**
@@ -53,5 +53,5 @@ export const KanbanColumn = ({
         {children}
       </div>
     </div>
-  )
-}
+  );
+};

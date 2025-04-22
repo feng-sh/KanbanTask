@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
+import { useEffect } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -21,17 +21,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Task, TeamMember } from "./types"
+} from "@/components/ui/select";
+import { Task, TeamMember } from "./types";
 
 /**
  * タスクフォームのバリデーションスキーマ
@@ -51,12 +51,12 @@ const taskFormSchema = z.object({
     required_error: "優先度を選択してください",
   }),
   assigneeId: z.string().optional(),
-})
+});
 
 /**
  * フォームの値の型定義
  */
-type TaskFormValues = z.infer<typeof taskFormSchema>
+type TaskFormValues = z.infer<typeof taskFormSchema>;
 
 /**
  * デフォルトの空のフォーム値
@@ -67,7 +67,7 @@ const defaultValues: Partial<TaskFormValues> = {
   status: "todo",
   priority: "medium",
   assigneeId: "unassigned",
-}
+};
 
 /**
  * タスクダイアログのプロパティ
@@ -83,7 +83,7 @@ interface TaskDialogProps {
   teamMembers: TeamMember[]
   /** タスク保存時のコールバック関数 */
   onSave: (values: TaskFormValues) => void
-}
+};
 
 /**
  * タスク作成・編集ダイアログコンポーネント
@@ -107,7 +107,7 @@ export const TaskDialog = ({
           assigneeId: task.assignee?.id,
         }
       : defaultValues,
-  })
+  });
 
   // ダイアログが開かれたときにフォームをリセット
   useEffect(() => {
@@ -120,18 +120,18 @@ export const TaskDialog = ({
           status: task.status,
           priority: task.priority || "medium",
           assigneeId: task.assignee?.id || "unassigned",
-        })
+        });
       } else {
-        form.reset(defaultValues)
+        form.reset(defaultValues);
       }
     }
-  }, [form, open, task])
+  }, [form, open, task]);
 
   // フォーム送信ハンドラ
   const onSubmit = (values: TaskFormValues) => {
-    onSave(values)
-    onOpenChange(false)
-  }
+    onSave(values);
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -274,5 +274,5 @@ export const TaskDialog = ({
         </Form>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};

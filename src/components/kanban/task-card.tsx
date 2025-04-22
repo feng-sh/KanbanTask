@@ -1,26 +1,26 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Task, TeamMember } from "./types"
-import { cn } from "@/lib/utils"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Check, ChevronsUpDown, UserCircle2 } from "lucide-react"
+import { useState } from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Task, TeamMember } from "./types";
+import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Check, ChevronsUpDown, UserCircle2 } from "lucide-react";
 
 /**
  * タスクカードのプロパティ定義
  */
 interface TaskCardProps {
   /** 表示するタスク情報 */
-  task: Task
+  task: Task;
   /** 追加のCSSクラス */
-  className?: string
+  className?: string;
   /** 割り当て可能なチームメンバーのリスト */
-  teamMembers: TeamMember[]
+  teamMembers: TeamMember[];
   /** 担当者変更時のコールバック関数 */
-  onAssigneeChange: (assigneeId: string | null) => void
+  onAssigneeChange: (assigneeId: string | null) => void;
 }
 
 /**
@@ -35,7 +35,7 @@ interface TaskCardProps {
  */
 export const TaskCard = ({ task, className, teamMembers, onAssigneeChange }: TaskCardProps) => {
   // ポップオーバーの開閉状態を管理
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   /**
    * 優先度に応じたバッジの色を定義
@@ -46,7 +46,7 @@ export const TaskCard = ({ task, className, teamMembers, onAssigneeChange }: Tas
     low: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
     medium: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
     high: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-  }
+  };
 
   /**
    * 名前からイニシャルを生成する関数
@@ -66,8 +66,8 @@ export const TaskCard = ({ task, className, teamMembers, onAssigneeChange }: Tas
       .split(" ")      // 名前を空白で分割
       .map((n) => n[0]) // 各単語の最初の文字を取得
       .join("")        // 文字を結合
-      .toUpperCase()    // 大文字に変換
-  }
+      .toUpperCase();    // 大文字に変換
+  };
 
   return (
     <Card className={cn("hover:shadow-md transition-shadow", className)}>
@@ -100,7 +100,7 @@ export const TaskCard = ({ task, className, teamMembers, onAssigneeChange }: Tas
                 className="h-8 border-dashed justify-start hover:bg-secondary/50 transition-colors"
                 onClick={(e) => {
                   // クリックイベントの伝播を停止して、親要素のクリックイベントが発火しないようにする
-                  e.stopPropagation();
+                  e.stopPropagation();;
                 }}
               >
                 {/* 担当者が割り当てられている場合はアバターと名前を表示 */}
@@ -129,7 +129,7 @@ export const TaskCard = ({ task, className, teamMembers, onAssigneeChange }: Tas
               align="end"
               onClick={(e) => {
                 // クリックイベントの伝播を停止
-                e.stopPropagation();
+                e.stopPropagation();;
               }}
             >
               <div className="max-h-[300px] overflow-auto">
@@ -146,15 +146,15 @@ export const TaskCard = ({ task, className, teamMembers, onAssigneeChange }: Tas
                     )}
                     onClick={() => {
                       // クリックされたメンバーを担当者に設定
-                      onAssigneeChange(member.id)
-                      setOpen(false) // ポップオーバーを閉じる
+                      onAssigneeChange(member.id);
+                      setOpen(false); // ポップオーバーを閉じる
                     }}
                     onKeyDown={(e) => {
                       // キーボードアクセシビリティのサポート
                       if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault()
-                        onAssigneeChange(member.id)
-                        setOpen(false)
+                        e.preventDefault();
+                        onAssigneeChange(member.id);
+                        setOpen(false);
                       }
                     }}
                   >
@@ -178,15 +178,15 @@ export const TaskCard = ({ task, className, teamMembers, onAssigneeChange }: Tas
                     className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer hover:bg-secondary border-t"
                     onClick={() => {
                       // 担当者の割り当てを解除
-                      onAssigneeChange(null)
-                      setOpen(false) // ポップオーバーを閉じる
+                      onAssigneeChange(null);
+                      setOpen(false); // ポップオーバーを閉じる
                     }}
                     onKeyDown={(e) => {
                       // キーボードアクセシビリティのサポート
                       if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault()
-                        onAssigneeChange(null)
-                        setOpen(false)
+                        e.preventDefault();
+                        onAssigneeChange(null);
+                        setOpen(false);
                       }
                     }}
                   >
@@ -200,5 +200,5 @@ export const TaskCard = ({ task, className, teamMembers, onAssigneeChange }: Tas
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};

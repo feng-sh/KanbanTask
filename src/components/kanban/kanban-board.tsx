@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { KanbanColumn } from "./kanban-column"
-import { TaskCard } from "./task-card"
-import { TaskDialog } from "./task-dialog"
-import { Task, TeamMember, KanbanColumn as KanbanColumnType } from "./types"
-import { Button } from "@/components/ui/button"
-import { PlusCircle } from "lucide-react"
-import { v4 as uuidv4 } from "uuid"
+import { useState, useMemo } from "react";
+import { KanbanColumn } from "./kanban-column";
+import { TaskCard } from "./task-card";
+import { TaskDialog } from "./task-dialog";
+import { Task, TeamMember, KanbanColumn as KanbanColumnType } from "./types";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * サンプルチームメンバーデータ
@@ -40,7 +40,7 @@ const teamMembers: TeamMember[] = [
     name: "Casey Morgan",
     avatar: "https://ui.shadcn.com/avatars/05.png",
   },
-]
+];
 
 /**
  * サンプルタスクデータ
@@ -95,7 +95,7 @@ const sampleTasks: Task[] = [
     priority: "high",
     assignee: teamMembers[0],
   },
-]
+];
 
 /**
  * カンバン列の定義
@@ -118,17 +118,17 @@ export const KanbanBoard = () => {
    * タスクの状態管理
    * 初期値としてサンプルタスクを設定
    */
-  const [tasks, setTasks] = useState<Task[]>(sampleTasks)
+  const [tasks, setTasks] = useState<Task[]>(sampleTasks);
 
   /**
    * ダイアログの状態管理
    */
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   /**
    * 編集中のタスクの状態管理
    */
-  const [editingTask, setEditingTask] = useState<Task | undefined>(undefined)
+  const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
 
   /**
    * タスクの担当者を更新する関数
@@ -142,23 +142,23 @@ export const KanbanBoard = () => {
         if (task.id === taskId) {
           if (assigneeId === null) {
             // 担当者を削除（割り当て解除）
-            const { assignee, ...rest } = task
-            return rest
+            const { assignee, ...rest } = task;
+            return rest;
           } else {
             // 新しい担当者を設定
             const newAssignee = teamMembers.find((member) => member.id === assigneeId)
             // エラーハンドリング: 担当者が見つからない場合
             if (!newAssignee) {
-              console.warn(`Team member with ID ${assigneeId} not found`)
-              return task // 変更せずに元のタスクを返す
+              console.warn(`Team member with ID ${assigneeId} not found`);
+              return task; // 変更せずに元のタスクを返す
             }
-            return { ...task, assignee: newAssignee }
+            return { ...task, assignee: newAssignee };
           }
         }
-        return task
+        return task;
       })
-    )
-  }
+    );
+  };
 
   /**
    * タスクをステータスでフィルタリング（メモ化）
@@ -170,24 +170,24 @@ export const KanbanBoard = () => {
       acc[column.id] = tasks.filter(task => task.status === column.status);
       return acc;
     }, {});
-  }, [tasks])
+  }, [tasks]);
 
   /**
    * タスクの編集を開始する関数
    * @param task - 編集対象のタスク
    */
   const handleEditTask = (task: Task) => {
-    setEditingTask(task)
-    setDialogOpen(true)
-  }
+    setEditingTask(task);
+    setDialogOpen(true);
+  };
 
   /**
    * 新規タスクの作成を開始する関数
    */
   const handleCreateTask = () => {
-    setEditingTask(undefined)
-    setDialogOpen(true)
-  }
+    setEditingTask(undefined);
+    setDialogOpen(true);
+  };
 
   /**
    * タスクの保存処理を行う関数
@@ -202,7 +202,7 @@ export const KanbanBoard = () => {
             // 担当者の処理
             let assignee
             if (values.assigneeId && values.assigneeId !== "unassigned") {
-              assignee = teamMembers.find((member) => member.id === values.assigneeId)
+              assignee = teamMembers.find((member) => member.id === values.assigneeId);
             }
 
             return {
@@ -212,11 +212,11 @@ export const KanbanBoard = () => {
               status: values.status,
               priority: values.priority,
               assignee,
-            }
+            };
           }
-          return task
+          return task;
         })
-      )
+      );
     } else {
       // 新規タスクの作成
       const newTask: Task = {
@@ -225,19 +225,19 @@ export const KanbanBoard = () => {
         description: values.description,
         status: values.status,
         priority: values.priority,
-      }
+      };
 
       // 担当者が選択されていれば追加
       if (values.assigneeId && values.assigneeId !== "unassigned") {
-        const assignee = teamMembers.find((member) => member.id === values.assigneeId)
+        const assignee = teamMembers.find((member) => member.id === values.assigneeId);
         if (assignee) {
-          newTask.assignee = assignee
+          newTask.assignee = assignee;
         }
       }
 
-      setTasks((prevTasks) => [...prevTasks, newTask])
+      setTasks((prevTasks) => [...prevTasks, newTask]);
     }
-  }
+  };
 
   return (
     <div className="w-full">
@@ -280,5 +280,5 @@ export const KanbanBoard = () => {
         onSave={handleSaveTask}
       />
     </div>
-  )
-}
+  );
+};
