@@ -8,7 +8,7 @@ import { Task, TeamMember, KanbanColumn as KanbanColumnType } from "./types";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 
-import { getTeamMembers, getColumns, getTasks, createTask } from "@/lib/actions/kanban";
+import { getTeamMembers, getColumns, getTasks, createTask, updateTask, getTaskById } from "@/lib/actions/kanban";
 
 /**
  * カンバンボードコンポーネント
@@ -80,29 +80,74 @@ export const KanbanBoard = () => {
    * @param taskId - 更新対象のタスクID
    * @param assigneeId - 新しい担当者のID（nullの場合は担当者を削除）
    */
-  const updateTaskAssignee = (taskId: string, assigneeId: string | null) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) => {
-        if (task.id === taskId) {
-          if (assigneeId === null) {
-            // 担当者を削除（割り当て解除）
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { assignee, ...rest } = task;
-            return rest;
-          } else {
-            // 新しい担当者を設定
-            const newAssignee = teamMembers.find((member) => member.id === assigneeId)
-            // エラーハンドリング: 担当者が見つからない場合
-            if (!newAssignee) {
-              console.warn(`Team member with ID ${assigneeId} not found`);
-              return task; // 変更せずに元のタスクを返す
+  const updateTaskAssignee = async (taskId: string, assigneeId: string | null) => {
+    try {
+      // 一時的にUIを更新（楽観的更新）
+      setTasks((prevTasks) =>
+        prevTasks.map((task) => {
+          if (task.id === taskId) {
+            if (assigneeId === null) {
+              // 担当者を削除（割り当て解除）
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const { assignee, ...rest } = task;
+              return rest;
+            } else {
+              // 新しい担当者を設定
+              const newAssignee = teamMembers.find((member) => member.id === assigneeId)
+              // エラーハンドリング: 担当者が見つからない場合
+              if (!newAssignee) {
+                console.warn(`Team member with ID ${assigneeId} not found`);
+                return task; // 変更せずに元のタスクを返す
+              }
+              return { ...task, assignee: newAssignee };
             }
-            return { ...task, assignee: newAssignee };
           }
+          return task;
+        })
+      );
+
+      // タスクの現在の情報を取得
+      const taskToUpdate = tasks.find(task => task.id === taskId);
+      if (!taskToUpdate) {
+        console.error(`Task with ID ${taskId} not found`);
+        return;
+      }
+
+      // サーバーアクションを呼び出してデータベースを更新
+      const result = await updateTask(taskId, {
+        title: taskToUpdate.title,
+        description: taskToUpdate.description || '',
+        status: taskToUpdate.status,
+        priority: taskToUpdate.priority || 'medium', // デフォルト値を設定
+        assigneeId: assigneeId || undefined,
+      });
+
+      if (!result.success) {
+        // エラーが発生した場合、エラーメッセージを表示
+        const errorMsg = 'error' in result ? result.error : '不明なエラー';
+        console.error('Failed to update task assignee:', errorMsg);
+        setErrorMessage(`担当者の更新に失敗しました: ${errorMsg}`);
+
+        // データを再取得して最新の状態に更新
+        const tasksResult = await getTasks();
+        if (tasksResult.success && 'data' in tasksResult && tasksResult.data) {
+          setTasks(tasksResult.data);
         }
-        return task;
-      })
-    );
+      }
+    } catch (error) {
+      console.error('Error updating task assignee:', error);
+      setErrorMessage('担当者の更新中にエラーが発生しました');
+
+      // エラーが発生した場合、データを再取得して最新の状態に更新
+      try {
+        const tasksResult = await getTasks();
+        if (tasksResult.success && 'data' in tasksResult && tasksResult.data) {
+          setTasks(tasksResult.data);
+        }
+      } catch (refreshError) {
+        console.error('Error refreshing tasks:', refreshError);
+      }
+    }
   };
 
   /**
@@ -147,28 +192,49 @@ export const KanbanBoard = () => {
     assigneeId?: string;
   }) => {
     if (values.id) {
-      // 既存タスクの更新
-      setTasks((prevTasks) =>
-        prevTasks.map((task) => {
-          if (task.id === values.id) {
-            // 担当者の処理
-            let assignee
-            if (values.assigneeId && values.assigneeId !== "unassigned") {
-              assignee = teamMembers.find((member) => member.id === values.assigneeId);
-            }
+      try {
+        // 既存タスクの更新（サーバーアクションを使用）
+        setIsLoading(true);
 
-            return {
-              ...task,
-              title: values.title,
-              description: values.description,
-              status: values.status,
-              priority: values.priority,
-              assignee,
-            };
-          }
-          return task;
-        })
-      );
+        const result = await updateTask(values.id, {
+          title: values.title,
+          description: values.description,
+          status: values.status,
+          priority: values.priority,
+          assigneeId: values.assigneeId !== "unassigned" ? values.assigneeId : undefined,
+        });
+
+        if (result.success && 'data' in result && result.data) {
+          // 更新されたタスクをステートに反映
+          setTasks((prevTasks) =>
+            prevTasks.map((task) => {
+              if (task.id === values.id) {
+                // 型アサーションを使用して、Task型に変換
+                const updatedTask: Task = {
+                  id: result.data.id,
+                  title: result.data.title,
+                  description: result.data.description,
+                  status: result.data.status as "todo" | "in-progress" | "done",
+                  priority: result.data.priority as "low" | "medium" | "high",
+                  assignee: result.data.assignee
+                };
+                return updatedTask;
+              }
+              return task;
+            })
+          );
+        } else {
+          // エラーメッセージを表示
+          const errorMsg = !result.success && 'error' in result ? result.error : '不明なエラー';
+          setErrorMessage(`タスクの更新に失敗しました: ${errorMsg}`);
+          console.error('Failed to update task:', errorMsg);
+        }
+      } catch (error) {
+        console.error('Error updating task:', error);
+        setErrorMessage('タスクの更新中にエラーが発生しました');
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       try {
         // 新規タスクの作成（サーバーアクションを使用）
@@ -182,18 +248,23 @@ export const KanbanBoard = () => {
           assigneeId: values.assigneeId !== "unassigned" ? values.assigneeId : undefined,
         });
 
-        if (result.success && result.data) {
+        if (result.success && 'data' in result && result.data) {
           // 作成されたタスクをステートに追加
-          // 担当者が指定されていない場合は明示的にundefinedに設定
-          const newTask = {
-            ...result.data,
-            assignee: result.data.assignee || undefined
+          // 型アサーションを使用して、Task型に変換
+          const newTask: Task = {
+            id: result.data.id,
+            title: result.data.title,
+            description: result.data.description,
+            status: result.data.status as "todo" | "in-progress" | "done",
+            priority: result.data.priority as "low" | "medium" | "high",
+            assignee: result.data.assignee
           };
           setTasks((prevTasks) => [...prevTasks, newTask]);
         } else {
           // エラーメッセージを表示
-          setErrorMessage(`タスクの作成に失敗しました: ${result.error || '不明なエラー'}`);
-          console.error('Failed to create task:', result.error);
+          const errorMsg = !result.success && 'error' in result ? result.error : '不明なエラー';
+          setErrorMessage(`タスクの作成に失敗しました: ${errorMsg}`);
+          console.error('Failed to create task:', errorMsg);
         }
       } catch (error) {
         console.error('Error creating task:', error);

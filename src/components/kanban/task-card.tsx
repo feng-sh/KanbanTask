@@ -20,7 +20,7 @@ interface TaskCardProps {
   /** 割り当て可能なチームメンバーのリスト */
   teamMembers: TeamMember[];
   /** 担当者変更時のコールバック関数 */
-  onAssigneeChange: (assigneeId: string | null) => void;
+  onAssigneeChange: (assigneeId: string | null) => Promise<void>;
 }
 
 /**
@@ -144,16 +144,16 @@ export const TaskCard = ({ task, className, teamMembers, onAssigneeChange }: Tas
                       // 現在の担当者には背景色を適用
                       task.assignee?.id === member.id && "bg-secondary"
                     )}
-                    onClick={() => {
+                    onClick={async () => {
                       // クリックされたメンバーを担当者に設定
-                      onAssigneeChange(member.id);
+                      await onAssigneeChange(member.id);
                       setOpen(false); // ポップオーバーを閉じる
                     }}
-                    onKeyDown={(e) => {
+                    onKeyDown={async (e) => {
                       // キーボードアクセシビリティのサポート
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        onAssigneeChange(member.id);
+                        await onAssigneeChange(member.id);
                         setOpen(false);
                       }
                     }}
@@ -176,16 +176,16 @@ export const TaskCard = ({ task, className, teamMembers, onAssigneeChange }: Tas
                     role="menuitem"
                     tabIndex={0}
                     className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer hover:bg-secondary border-t"
-                    onClick={() => {
+                    onClick={async () => {
                       // 担当者の割り当てを解除
-                      onAssigneeChange(null);
+                      await onAssigneeChange(null);
                       setOpen(false); // ポップオーバーを閉じる
                     }}
-                    onKeyDown={(e) => {
+                    onKeyDown={async (e) => {
                       // キーボードアクセシビリティのサポート
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        onAssigneeChange(null);
+                        await onAssigneeChange(null);
                         setOpen(false);
                       }
                     }}

@@ -94,13 +94,16 @@ export const getTasks = async () => {
  * @param taskData - 作成するタスクのデータ
  * @returns 作成されたタスクの情報
  */
-export const createTask = async (taskData: {
+// タスクデータの型定義
+type TaskData = {
   title: string;
   description: string;
   status: "todo" | "in-progress" | "done";
   priority: "low" | "medium" | "high";
   assigneeId?: string;
-}) => {
+};
+
+export const createTask = async (taskData: TaskData) => {
   // 明示的なデバッグポイント
   debugger;
 
@@ -186,6 +189,200 @@ export const createTask = async (taskData: {
     return {
       success: false,
       error: `タスクの作成に失敗しました: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+};
+
+/**
+ * タスクを編集する
+ * @param taskId - 編集するタスクのID
+ * @param taskData - 更新するタスクのデータ
+ * @returns 更新されたタスクの情報
+ */
+/**
+ * タスクをIDで取得する
+ * @param taskId - 取得するタスクのID
+ * @returns タスクの情報
+ */
+export const getTaskById = async (taskId: string) => {
+  try {
+    // バリデーション
+    if (!taskId) {
+      return {
+        success: false,
+        error: 'タスクIDは必須です',
+      };
+    }
+
+    // タスクを取得
+    const task = await db.query.tasks.findFirst({
+      where: eq(tasks.id, parseInt(taskId)),
+      with: {
+        assignee: true,
+      },
+    });
+
+    if (!task) {
+      return {
+        success: false,
+        error: `ID ${taskId} のタスクが見つかりません`,
+      };
+    }
+
+    // 担当者情報を整形
+    let assignee = undefined;
+    if (task.assignee) {
+      assignee = {
+        id: task.assignee.userId,
+        name: task.assignee.name,
+        avatar: task.assignee.avatar || undefined,
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        id: String(task.id),
+        title: task.title,
+        description: task.description || '',
+        status: task.status,
+        priority: task.priority || 'medium',
+        assignee,
+      },
+    };
+  } catch (error) {
+    console.error('Failed to get task:', error);
+    return {
+      success: false,
+      error: `タスクの取得に失敗しました: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+};
+
+export const updateTask = async (taskId: string, taskData: TaskData) => {
+  // 明示的なデバッグポイント
+  debugger;
+
+  // 入力データをデバッグログに出力
+  console.log('=== SERVER ACTION START: updateTask ===');
+  console.log('TaskID:', taskId);
+  console.log('UpdateTask Input:', JSON.stringify(taskData, null, 2));
+
+  try {
+    // バリデーション
+    if (!taskId) {
+      return {
+        success: false,
+        error: 'タスクIDは必須です',
+      };
+    }
+
+    if (!taskData.title) {
+      return {
+        success: false,
+        error: 'タイトルは必須です',
+      };
+    }
+
+    // タスクが存在するか確認
+    const existingTask = await db.query.tasks.findFirst({
+      where: eq(tasks.id, parseInt(taskId)),
+      with: {
+        assignee: true,
+      },
+    });
+
+    if (!existingTask) {
+      return {
+        success: false,
+        error: `ID ${taskId} のタスクが見つかりません`,
+      };
+    }
+
+    console.log('Existing task found:', JSON.stringify(existingTask, null, 2));
+
+    // 担当者の処理
+    let assigneeId: number | null = null;
+    if (taskData.assigneeId && taskData.assigneeId !== 'unassigned') {
+      // 担当者IDが指定されている場合、データベースに存在するか確認
+      const member = await db.query.teamMembers.findFirst({
+        where: eq(teamMembers.userId, taskData.assigneeId),
+      });
+
+      if (member) {
+        assigneeId = member.id;
+        console.log(`Assigned to member ID: ${assigneeId}`);
+      } else {
+        console.warn(`Team member with ID ${taskData.assigneeId} not found`);
+      }
+    }
+
+    // タスクをデータベースで更新
+    const updateValues = {
+      title: taskData.title,
+      description: taskData.description,
+      status: taskData.status,
+      priority: taskData.priority,
+      assigneeId: assigneeId,
+    };
+
+    console.log('Update Values:', JSON.stringify(updateValues, null, 2));
+
+    const updatedTask = await db.update(tasks)
+      .set(updateValues)
+      .where(eq(tasks.id, parseInt(taskId)))
+      .returning();
+
+    if (!updatedTask || updatedTask.length === 0) {
+      throw new Error('タスクの更新に失敗しました');
+    }
+
+    const newTask = updatedTask[0];
+    console.log('Updated task:', JSON.stringify(newTask, null, 2));
+
+    // 担当者情報を取得（存在する場合）
+    let assignee = undefined;
+    if (newTask.assigneeId) {
+      const member = await db.query.teamMembers.findFirst({
+        where: eq(teamMembers.id, newTask.assigneeId),
+      });
+
+      if (member) {
+        assignee = {
+          id: member.userId,
+          name: member.name,
+          avatar: member.avatar || undefined,
+        };
+        console.log('Assignee details:', JSON.stringify(assignee, null, 2));
+      } else {
+        console.warn(`Assignee with ID ${newTask.assigneeId} not found`);
+      }
+    }
+
+    // 更新されたタスクを返す
+    const result = {
+      success: true,
+      data: {
+        id: String(newTask.id),
+        title: newTask.title,
+        description: newTask.description || '',
+        status: newTask.status,
+        priority: newTask.priority || 'medium',
+        assignee: assignee || undefined,
+      },
+    };
+
+    console.log('UpdateTask Result:', JSON.stringify(result, null, 2));
+    console.log('=== SERVER ACTION END: updateTask ===');
+
+    return result;
+  } catch (error) {
+    console.error('Failed to update task:', error);
+    console.log('Error details:', error instanceof Error ? error.stack : String(error));
+
+    return {
+      success: false,
+      error: `タスクの更新に失敗しました: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 };
