@@ -1,4 +1,4 @@
-import { pgTable, serial, text, varchar, timestamp, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, varchar, timestamp, pgEnum, integer } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // ステータスの列挙型を定義
@@ -33,7 +33,7 @@ export const tasks = pgTable('tasks', {
   description: text('description'),
   status: statusEnum('status').notNull(),
   priority: priorityEnum('priority').default('medium'),
-  assigneeId: serial('assignee_id').references(() => teamMembers.id),
+  assigneeId: integer('assignee_id').references(() => teamMembers.id),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

@@ -184,7 +184,12 @@ export const KanbanBoard = () => {
 
         if (result.success && result.data) {
           // 作成されたタスクをステートに追加
-          setTasks((prevTasks) => [...prevTasks, result.data]);
+          // 担当者が指定されていない場合は明示的にundefinedに設定
+          const newTask = {
+            ...result.data,
+            assignee: result.data.assignee || undefined
+          };
+          setTasks((prevTasks) => [...prevTasks, newTask]);
         } else {
           // エラーメッセージを表示
           setErrorMessage(`タスクの作成に失敗しました: ${result.error || '不明なエラー'}`);

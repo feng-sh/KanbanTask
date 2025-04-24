@@ -111,7 +111,7 @@ export const createTask = async (taskData: {
     }
 
     // 担当者の処理
-    let assigneeId: number | undefined = undefined;
+    let assigneeId: number | null = null;
     if (taskData.assigneeId && taskData.assigneeId !== 'unassigned') {
       // 担当者IDが指定されている場合、データベースに存在するか確認
       const member = await db.query.teamMembers.findFirst({
@@ -126,17 +126,13 @@ export const createTask = async (taskData: {
     }
 
     // タスクをデータベースに挿入
-    const insertValues: any = {
+    const insertValues = {
       title: taskData.title,
       description: taskData.description,
       status: taskData.status,
       priority: taskData.priority,
+      assigneeId: assigneeId, // nullを許容するようになったので、常に設定可能
     };
-
-    // 担当者が指定されている場合のみassigneeIdを設定
-    if (assigneeId !== undefined) {
-      insertValues.assigneeId = assigneeId;
-    }
 
     const insertedTask = await db.insert(tasks).values(insertValues).returning();
 
@@ -171,7 +167,7 @@ export const createTask = async (taskData: {
         description: newTask.description || '',
         status: newTask.status,
         priority: newTask.priority || 'medium',
-        assignee,
+        assignee: assignee || undefined,
       },
     };
   } catch (error) {

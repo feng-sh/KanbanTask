@@ -113,10 +113,10 @@ export const TaskCard = ({ task, className, teamMembers, onAssigneeChange }: Tas
                     <span className="text-xs">{task.assignee.name}</span>
                   </div>
                 ) : (
-                  // 担当者が割り当てられていない場合は「担当者を割り当て」を表示
+                  // 担当者が割り当てられていない場合は「未割り当て」を表示
                   <div className="flex items-center gap-2">
                     <UserCircle2 className="h-4 w-4" />
-                    <span className="text-xs">担当者を割り当て</span>
+                    <span className="text-xs">未割り当て</span>
                   </div>
                 )}
                 <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
