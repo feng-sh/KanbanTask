@@ -8,11 +8,7 @@
       "command": "npm run debug",
       "skipFiles": [
         "<node_internals>/**"
-      ],
-      "env": {
-        "NODE_OPTIONS": "--inspect-brk",
-        "DEBUG": "*"
-      }
+      ]
     },
     {
       "name": "Next.js: debug client-side",
@@ -25,10 +21,7 @@
       "type": "node-terminal",
       "request": "launch",
       "command": "npm run debug",
-      "env": {
-        "NODE_OPTIONS": "--inspect-brk",
-        "DEBUG": "*"
-      },
+
       "serverReadyAction": {
         "pattern": "- Local:.+(https?://.+)",
         "uriFormat": "%s",
