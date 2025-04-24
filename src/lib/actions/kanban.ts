@@ -101,6 +101,12 @@ export const createTask = async (taskData: {
   priority: "low" | "medium" | "high";
   assigneeId?: string;
 }) => {
+  // 明示的なデバッグポイント
+  debugger;
+
+  // 入力データをデバッグログに出力
+  console.log('CreateTask Input:', JSON.stringify(taskData, null, 2));
+
   try {
     // バリデーション
     if (!taskData.title) {
@@ -126,6 +132,9 @@ export const createTask = async (taskData: {
     }
 
     // タスクをデータベースに挿入
+    // 明示的なデバッグポイント
+    debugger;
+
     const insertValues = {
       title: taskData.title,
       description: taskData.description,
@@ -133,6 +142,8 @@ export const createTask = async (taskData: {
       priority: taskData.priority,
       assigneeId: assigneeId, // nullを許容するようになったので、常に設定可能
     };
+
+    console.log('Insert Values:', JSON.stringify(insertValues, null, 2));
 
     const insertedTask = await db.insert(tasks).values(insertValues).returning();
 
