@@ -7,8 +7,8 @@ import { TaskDialog } from "./task-dialog";
 import { Task, TeamMember, KanbanColumn as KanbanColumnType } from "./types";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import { v4 as uuidv4 } from "uuid";
-import { getTeamMembers, getColumns, getTasks } from "@/lib/actions/kanban";
+
+import { getTeamMembers, getColumns, getTasks, createTask } from "@/lib/actions/kanban";
 
 /**
  * カンバンボードコンポーネント
@@ -138,7 +138,7 @@ export const KanbanBoard = () => {
    * タスクの保存処理を行う関数
    * @param values - フォームの値
    */
-  const handleSaveTask = (values: {
+  const handleSaveTask = async (values: {
     id?: string;
     title: string;
     description: string;
@@ -170,24 +170,32 @@ export const KanbanBoard = () => {
         })
       );
     } else {
-      // 新規タスクの作成
-      const newTask: Task = {
-        id: uuidv4(),
-        title: values.title,
-        description: values.description,
-        status: values.status,
-        priority: values.priority,
-      };
+      try {
+        // 新規タスクの作成（サーバーアクションを使用）
+        setIsLoading(true);
 
-      // 担当者が選択されていれば追加
-      if (values.assigneeId && values.assigneeId !== "unassigned") {
-        const assignee = teamMembers.find((member) => member.id === values.assigneeId);
-        if (assignee) {
-          newTask.assignee = assignee;
+        const result = await createTask({
+          title: values.title,
+          description: values.description,
+          status: values.status,
+          priority: values.priority,
+          assigneeId: values.assigneeId !== "unassigned" ? values.assigneeId : undefined,
+        });
+
+        if (result.success && result.data) {
+          // 作成されたタスクをステートに追加
+          setTasks((prevTasks) => [...prevTasks, result.data]);
+        } else {
+          // エラーメッセージを表示
+          setErrorMessage(`タスクの作成に失敗しました: ${result.error || '不明なエラー'}`);
+          console.error('Failed to create task:', result.error);
         }
+      } catch (error) {
+        console.error('Error creating task:', error);
+        setErrorMessage('タスクの作成中にエラーが発生しました');
+      } finally {
+        setIsLoading(false);
       }
-
-      setTasks((prevTasks) => [...prevTasks, newTask]);
     }
   };
 

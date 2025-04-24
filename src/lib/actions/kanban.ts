@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { columns, tasks, teamMembers } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 /**
  * チームメンバー一覧を取得する
@@ -85,6 +85,100 @@ export const getTasks = async () => {
     return {
       success: false,
       error: 'タスクの取得に失敗しました',
+    };
+  }
+};
+
+/**
+ * 新しいタスクを作成する
+ * @param taskData - 作成するタスクのデータ
+ * @returns 作成されたタスクの情報
+ */
+export const createTask = async (taskData: {
+  title: string;
+  description: string;
+  status: "todo" | "in-progress" | "done";
+  priority: "low" | "medium" | "high";
+  assigneeId?: string;
+}) => {
+  try {
+    // バリデーション
+    if (!taskData.title) {
+      return {
+        success: false,
+        error: 'タイトルは必須です',
+      };
+    }
+
+    // 担当者の処理
+    let assigneeId: number | undefined = undefined;
+    if (taskData.assigneeId && taskData.assigneeId !== 'unassigned') {
+      // 担当者IDが指定されている場合、データベースに存在するか確認
+      const member = await db.query.teamMembers.findFirst({
+        where: eq(teamMembers.userId, taskData.assigneeId),
+      });
+
+      if (member) {
+        assigneeId = member.id;
+      } else {
+        console.warn(`Team member with ID ${taskData.assigneeId} not found`);
+      }
+    }
+
+    // タスクをデータベースに挿入
+    const insertValues: any = {
+      title: taskData.title,
+      description: taskData.description,
+      status: taskData.status,
+      priority: taskData.priority,
+    };
+
+    // 担当者が指定されている場合のみassigneeIdを設定
+    if (assigneeId !== undefined) {
+      insertValues.assigneeId = assigneeId;
+    }
+
+    const insertedTask = await db.insert(tasks).values(insertValues).returning();
+
+    if (!insertedTask || insertedTask.length === 0) {
+      throw new Error('タスクの作成に失敗しました');
+    }
+
+    const newTask = insertedTask[0];
+
+    // 担当者情報を取得（存在する場合）
+    let assignee = undefined;
+    if (newTask.assigneeId) {
+      const member = await db.query.teamMembers.findFirst({
+        where: eq(teamMembers.id, newTask.assigneeId),
+      });
+
+      if (member) {
+        assignee = {
+          id: member.userId,
+          name: member.name,
+          avatar: member.avatar || undefined,
+        };
+      }
+    }
+
+    // 作成されたタスクを返す
+    return {
+      success: true,
+      data: {
+        id: String(newTask.id),
+        title: newTask.title,
+        description: newTask.description || '',
+        status: newTask.status,
+        priority: newTask.priority || 'medium',
+        assignee,
+      },
+    };
+  } catch (error) {
+    console.error('Failed to create task:', error);
+    return {
+      success: false,
+      error: `タスクの作成に失敗しました: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 };
