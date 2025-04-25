@@ -97,6 +97,10 @@ export const KanbanBoard = () => {
               // エラーハンドリング: 担当者が見つからない場合
               if (!newAssignee) {
                 console.warn(`Team member with ID ${assigneeId} not found`);
+                // エラーメッセージを表示（非同期処理の外なので、後で処理される）
+                setTimeout(() => {
+                  setErrorMessage(`担当者ID ${assigneeId} が見つかりません。担当者の変更はキャンセルされました。`);
+                }, 0);
                 return task; // 変更せずに元のタスクを返す
               }
               return { ...task, assignee: newAssignee };
@@ -110,6 +114,12 @@ export const KanbanBoard = () => {
       const taskToUpdate = tasks.find(task => task.id === taskId);
       if (!taskToUpdate) {
         console.error(`Task with ID ${taskId} not found`);
+        return;
+      }
+
+      // 担当者が見つからない場合はサーバーアクションを呼び出さない
+      if (assigneeId && !teamMembers.find(member => member.id === assigneeId)) {
+        console.warn(`Team member with ID ${assigneeId} not found, skipping server action`);
         return;
       }
 

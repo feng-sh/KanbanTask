@@ -131,6 +131,11 @@ export const createTask = async (taskData: TaskData) => {
         assigneeId = member.id;
       } else {
         console.warn(`Team member with ID ${taskData.assigneeId} not found`);
+        // 担当者が見つからない場合はエラーを返す
+        return {
+          success: false,
+          error: `担当者ID ${taskData.assigneeId} が見つかりません。タスクの作成はキャンセルされました。`,
+        };
       }
     }
 
@@ -314,6 +319,11 @@ export const updateTask = async (taskId: string, taskData: TaskData) => {
         console.log(`Assigned to member ID: ${assigneeId}`);
       } else {
         console.warn(`Team member with ID ${taskData.assigneeId} not found`);
+        // 担当者が見つからない場合はエラーを返す
+        return {
+          success: false,
+          error: `担当者ID ${taskData.assigneeId} が見つかりません。タスクの更新はキャンセルされました。`,
+        };
       }
     }
 
