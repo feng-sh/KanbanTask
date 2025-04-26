@@ -1,72 +1,160 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# カンバンボードアプリケーション
 
-## Getting Started
+このプロジェクトは[Next.js](https://nextjs.org)を使用して構築された、モダンなカンバンボードアプリケーションです。タスク管理を効率化し、チームの生産性を向上させるための直感的なインターフェースを提供します。
 
-### Database Setup
+## 機能概要
 
-This project uses PostgreSQL with Drizzle ORM. Follow these steps to set up the database:
+- **カンバンボード**: タスクを「未着手」「進行中」「完了」の3つのステータスで管理
+- **タスク管理**: タスクの作成、編集、ステータス変更、担当者の割り当て
+- **優先度設定**: タスクに優先度（低・中・高）を設定可能
+- **チームメンバー管理**: タスクにチームメンバーを割り当て可能
+- **レスポンシブデザイン**: モバイルからデスクトップまで様々なデバイスに対応
+- **ダークモード対応**: ライト/ダークモードの切り替えをサポート
 
-1. Start the PostgreSQL database using Docker:
+## 技術スタック
+
+- **フロントエンド**: Next.js 15.x (App Router), React, TypeScript
+- **UI**: Shadcn UI, Tailwind CSS
+- **バックエンド**: Next.js Server Actions
+- **データベース**: PostgreSQL
+- **ORM**: Drizzle ORM
+- **コンテナ化**: Docker, Docker Compose
+- **フォーム管理**: React Hook Form, Zod
+
+## 始め方
+
+### 前提条件
+
+- Node.js 18.x以上
+- Docker および Docker Compose
+- npm または yarn
+
+### データベースのセットアップ
+
+このプロジェクトはPostgreSQLとDrizzle ORMを使用しています。以下の手順でデータベースをセットアップしてください：
+
+1. Dockerを使用してPostgreSQLデータベースを起動：
 
 ```bash
 docker-compose up -d
 ```
 
-2. Generate the database migrations:
+2. データベースマイグレーションを生成：
 
 ```bash
 npm run db:generate
 ```
 
-   または、スキーマを直接データベースに適用する場合:
+3. スキーマを直接データベースに適用する場合：
 
 ```bash
 npm run db:push
 ```
 
-3. Apply the migrations to the database:
+4. マイグレーションをデータベースに適用：
 
 ```bash
-npm run db:migrate:run
+npm run db:migrate
 ```
 
-4. Seed the database with initial data:
+5. 初期データをデータベースに投入：
 
 ```bash
 npm run db:seed
 ```
 
-### Running the Application
+### アプリケーションの実行
 
-After setting up the database, run the development server:
+データベースのセットアップ後、開発サーバーを起動します：
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ブラウザで[http://localhost:3000](http://localhost:3000)を開くと、アプリケーションが表示されます。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 使い方
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### タスクの作成
 
-## Learn More
+1. カンバンボード画面右上の「新規タスク」ボタンをクリック
+2. タスクのタイトル、説明、ステータス、優先度を入力
+3. 必要に応じて担当者を選択
+4. 「保存」ボタンをクリックしてタスクを作成
 
-To learn more about Next.js, take a look at the following resources:
+### タスクの編集
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. 編集したいタスクカードをクリック
+2. 表示されたダイアログで情報を編集
+3. 「保存」ボタンをクリックして変更を適用
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 担当者の変更
 
-## Deploy on Vercel
+1. タスクカード上の担当者アイコンをクリック
+2. ドロップダウンメニューから担当者を選択
+3. 担当者の割り当てを解除する場合は「割り当て解除」を選択
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### タスクのステータス変更
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+タスクの編集ダイアログでステータスを変更することができます。
+
+## デバッグ方法
+
+### VSCodeでのデバッグ
+
+1. VSCodeの「実行とデバッグ」タブを開く
+2. 「Next.js: debug server-side」を選択して実行
+3. ブレークポイントを設定してデバッグ
+
+### Chrome DevToolsでのデバッグ
+
+1. `debug.bat`を実行
+2. Chromeで`chrome://inspect`にアクセス
+3. 「Open dedicated DevTools for Node」をクリック
+
+## プロジェクト構造
+
+```
+src/
+├── app/                  # Next.jsのアプリケーションルーター
+│   ├── api/              # APIエンドポイント
+│   └── page.tsx          # メインページ
+├── components/           # Reactコンポーネント
+│   ├── ui/               # 共通UIコンポーネント
+│   └── kanban/           # カンバンボード関連コンポーネント
+├── lib/                  # ユーティリティ関数とサーバーアクション
+│   ├── actions/          # サーバーアクション
+│   ├── db/               # データベース関連
+│   └── utils.ts          # ユーティリティ関数
+└── styles/               # グローバルスタイル
+```
+
+## 開発者向け情報
+
+### サーバーアクションのデバッグ
+
+サーバーアクションのデバッグには以下の方法があります：
+
+1. VSCodeのデバッガーを使用
+2. `debug.bat`を実行してNode.jsデバッガーを使用
+3. コンソールログを使用
+
+### データベーススキーマの変更
+
+1. `src/lib/db/schema.ts`ファイルを編集
+2. `npm run db:generate`を実行して新しいマイグレーションを生成
+3. `npm run db:push`または`npm run db:migrate`を実行してデータベースに適用
+
+## デプロイ
+
+このアプリケーションは[Vercel](https://vercel.com)にデプロイすることができます。
+
+1. GitHubリポジトリをVercelにインポート
+2. 環境変数を設定（データベース接続情報など）
+3. デプロイを実行
+
+詳細は[Next.jsのデプロイドキュメント](https://nextjs.org/docs/app/building-your-application/deploying)を参照してください。
+
+## ライセンス
+
+このプロジェクトはMITライセンスの下で公開されています。詳細は[LICENSE](LICENSE)ファイルを参照してください。
